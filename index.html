@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống Quản lý Cửa hàng</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container {
+            padding-top: 50px;
+        }
+        .main-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+        .feature-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 15px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            text-decoration: none;
+            color: inherit;
+        }
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 10px 0;
+            text-align: center;
+        }
+        .stats-card.blue {
+            background: linear-gradient(135deg, #3742fa, #2f3542);
+        }
+        .stats-card.green {
+            background: linear-gradient(135deg, #2ed573, #1e90ff);
+        }
+        .logo {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+        }
+        .quick-stats {
+            margin-top: 40px;
+        }
+        .feature-title {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        .feature-desc {
+            color: #666;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <!-- Main Welcome Card -->
+                <div class="main-card text-center">
+                    <div class="logo">🏪</div>
+                    <h1 class="display-4 fw-bold mb-3">HỆ THỐNG QUẢN LÝ CỬA HÀNG</h1>
+                    <p class="subtitle">Quản lý sản phẩm và danh mục một cách dễ dàng và hiệu quả</p>
+                    
+                    <!-- Quick Stats -->
+                    <div class="row quick-stats">
+                        <div class="col-md-4">
+                            <div class="stats-card">
+                                <h3 id="totalProducts">0</h3>
+                                <p class="mb-0">Sản phẩm</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stats-card blue">
+                                <h3 id="totalCategories">0</h3>
+                                <p class="mb-0">Danh mục</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stats-card green">
+                                <h3 id="totalValue">0đ</h3>
+                                <p class="mb-0">Tổng giá trị</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature Cards -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <a href="categories.html" class="feature-card">
+                            <div class="text-center">
+                                <div class="feature-icon">📦</div>
+                                <h4 class="feature-title">Quản lý Danh mục</h4>
+                                <p class="feature-desc">
+                                    Thêm, sửa, xóa và quản lý các danh mục sản phẩm. 
+                                    Tổ chức sản phẩm theo từng nhóm một cách khoa học.
+                                </p>
+                                <div class="mt-3">
+                                    <span class="btn btn-outline-primary">Truy cập ngay →</span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <a href="products.html" class="feature-card">
+                            <div class="text-center">
+                                <div class="feature-icon">🛍️</div>
+                                <h4 class="feature-title">Quản lý Sản phẩm</h4>
+                                <p class="feature-desc">
+                                    Quản lý toàn bộ sản phẩm với đầy đủ thông tin. 
+                                    Tìm kiếm, lọc và cập nhật dữ liệu một cách nhanh chóng.
+                                </p>
+                                <div class="mt-3">
+                                    <span class="btn btn-outline-success">Truy cập ngay →</span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="main-card">
+                    <h5 class="text-center mb-4">🚀 Thao tác nhanh</h5>
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <button class="btn btn-lg btn-primary w-100 mb-2" onclick="window.open('categories.html', '_blank')">
+                                ➕ Thêm danh mục
+                            </button>
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-lg btn-success w-100 mb-2" onclick="window.open('products.html', '_blank')">
+                                ➕ Thêm sản phẩm
+                            </button>
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-lg btn-info w-100 mb-2" onclick="refreshStats()">
+                                🔄 Làm mới dữ liệu
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="text-center text-white">
+                    <p class="mb-0">© 2024 Hệ thống Quản lý Cửa hàng - Phiên bản 1.0</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://localhost:7077/api';
+
+        // Load statistics on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStatistics();
+        });
+
+        // Load statistics from API
+        async function loadStatistics() {
+            try {
+                // Load products and categories
+                const [productsResponse, categoriesResponse] = await Promise.all([
+                    fetch(`${API_URL}/ProductApi`),
+                    fetch(`${API_URL}/CategoryApi`)
+                ]);
+
+                const products = await productsResponse.json();
+                const categories = await categoriesResponse.json();
+
+                // Calculate statistics
+                const totalProducts = products.length;
+                const totalCategories = categories.length;
+                const totalValue = products.reduce((sum, product) => sum + (product.price || 0), 0);
+
+                // Update display
+                document.getElementById('totalProducts').textContent = totalProducts;
+                document.getElementById('totalCategories').textContent = totalCategories;
+                document.getElementById('totalValue').textContent = formatCurrency(totalValue);
+
+            } catch (error) {
+                console.error('Lỗi khi tải thống kê:', error);
+                document.getElementById('totalProducts').textContent = '?';
+                document.getElementById('totalCategories').textContent = '?';
+                document.getElementById('totalValue').textContent = '?';
+            }
+        }
+
+        // Format currency
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            }).format(amount);
+        }
+
+        // Refresh statistics
+        function refreshStats() {
+            loadStatistics();
+            // Show a simple feedback
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '⏳ Đang tải...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Sản phẩm</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; font-family: Arial, sans-serif; }
+        .container { max-width: 1200px; margin-top: 30px; }
+        .card { border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .card-header { background: linear-gradient(135deg, #007bff, #0056b3); color: white; font-weight: bold; }
+        .table { background-color: white; }
+        .btn-group .btn { margin: 0 2px; }
+        .navbar { background: linear-gradient(135deg, #007bff, #0056b3); }
+        .navbar-brand { color: white !important; font-weight: bold; }
+        .nav-link { color: rgba(255,255,255,0.8) !important; }
+        .nav-link:hover { color: white !important; }
+        .price { font-weight: bold; color: #28a745; }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="#">🏪 QUẢN LÝ CỬA HÀNG</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="categories.html">📦 Danh mục</a>
+                <a class="nav-link active" href="products.html">🛍️ Sản phẩm</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="text-center mb-4">
+            <h1>🛍️ QUẢN LÝ SẢN PHẨM</h1>
+            <p class="text-muted">Thêm, sửa, xóa các sản phẩm trong cửa hàng</p>
+        </div>
+
+        <!-- Add/Edit Form -->
+        <div class="card">
+            <div class="card-header">
+                <h5 id="formTitle">➕ Thêm sản phẩm mới</h5>
+            </div>
+            <div class="card-body">
+                <form id="productForm">
+                    <input type="hidden" id="productId">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label class="form-label">Tên sản phẩm <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="productName" required placeholder="Nhập tên sản phẩm">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Giá (VNĐ) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="productPrice" min="0" step="1000" required placeholder="0">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Mô tả</label>
+                            <input type="text" class="form-control" id="productDescription" placeholder="Mô tả sản phẩm">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Danh mục <span class="text-danger">*</span></label>
+                            <select class="form-control" id="productCategory" required>
+                                <option value="">Chọn danh mục</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-grid">
+                                <button type="button" class="btn btn-primary" id="btnSave" onclick="saveProduct()">
+                                    ➕ Thêm
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <button type="button" class="btn btn-secondary btn-sm" id="btnCancel" onclick="cancelEdit()" style="display: none;">
+                                ❌ Hủy chỉnh sửa
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Products List -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5>📋 Danh sách sản phẩm</h5>
+                <div>
+                    <button class="btn btn-outline-light btn-sm" onclick="refreshData()">🔄 Làm mới</button>
+                    <span class="badge bg-light text-dark ms-2">Tổng: <span id="totalCount">0</span></span>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Search and Filter -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" id="searchInput" placeholder="🔍 Tìm kiếm sản phẩm..." onkeyup="searchProducts()">
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-control" id="categoryFilter" onchange="filterByCategory()">
+                            <option value="">Tất cả danh mục</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-control" id="priceFilter" onchange="filterByPrice()">
+                            <option value="">Tất cả giá</option>
+                            <option value="0-100000">Dưới 100k</option>
+                            <option value="100000-500000">100k - 500k</option>
+                            <option value="500000-1000000">500k - 1M</option>
+                            <option value="1000000-999999999">Trên 1M</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered">
+                        <thead class="table-dark">
+                            <tr>
+                                <th style="width: 60px;">ID</th>
+                                <th>Tên sản phẩm</th>
+                                <th style="width: 120px;">Giá</th>
+                                <th>Mô tả</th>
+                                <th style="width: 120px;">Danh mục</th>
+                                <th style="width: 200px;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsList">
+                            <tr>
+                                <td colspan="6" class="text-center">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p class="mt-2 mb-0">Đang tải dữ liệu...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Configuration
+        const API_URL = 'https://localhost:7077/api';
+        
+        // Global variables
+        let products = [];
+        let categories = [];
+        let filteredProducts = [];
+        let editingId = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            checkCategoryFilter();
+        });
+
+        // Check URL for category filter
+        function checkCategoryFilter() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const categoryId = urlParams.get('category');
+            if (categoryId) {
+                setTimeout(() => {
+                    document.getElementById('categoryFilter').value = categoryId;
+                    filterByCategory();
+                }, 1000);
+            }
+        }
+
+        // Load all data
+        async function loadData() {
+            await Promise.all([loadProducts(), loadCategories()]);
+            updateDisplay();
+        }
+
+        // Load products
+        async function loadProducts() {
+            try {
+                const response = await fetch(`${API_URL}/ProductApi`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                products = await response.json();
+                filteredProducts = [...products];
+            } catch (error) {
+                showToast('Lỗi khi tải sản phẩm: ' + error.message, 'danger');
+                products = [];
+                filteredProducts = [];
+            }
+        }
+
+        // Load categories
+        async function loadCategories() {
+            try {
+                const response = await fetch(`${API_URL}/CategoryApi`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                categories = await response.json();
+                updateCategorySelects();
+            } catch (error) {
+                showToast('Lỗi khi tải danh mục: ' + error.message, 'danger');
+                categories = [];
+            }
+        }
+
+        // Update category selects
+        function updateCategorySelects() {
+            const productSelect = document.getElementById('productCategory');
+            const filterSelect = document.getElementById('categoryFilter');
+            
+            productSelect.innerHTML = '<option value="">Chọn danh mục</option>';
+            filterSelect.innerHTML = '<option value="">Tất cả danh mục</option>';
+            
+            categories.forEach(category => {
+                productSelect.innerHTML += `<option value="${category.id}">${category.name}</option>`;
+                filterSelect.innerHTML += `<option value="${category.id}">${category.name}</option>`;
+            });
+        }
+
+        // Update display
+        function updateDisplay() {
+            displayProducts();
+            updateTotalCount();
+        }
+
+        // Display products
+        function displayProducts() {
+            const tbody = document.getElementById('productsList');
+            
+            if (filteredProducts.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Không có sản phẩm nào</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filteredProducts.map(product => {
+                const category = categories.find(c => c.id === product.categoryId);
+                return `
+                    <tr>
+                        <td><strong>#${product.id}</strong></td>
+                        <td><strong class="text-primary">${product.name}</strong></td>
+                        <td class="price">${formatCurrency(product.price)}</td>
+                        <td>${product.description || '<em class="text-muted">Không có mô tả</em>'}</td>
+                        <td>
+                            <span class="badge bg-secondary">${category ? category.name : 'N/A'}</span>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button class="btn btn-outline-info" onclick="viewProduct(${product.id})" title="Xem chi tiết">
+                                    👁️ Xem
+                                </button>
+                                <button class="btn btn-outline-warning" onclick="editProduct(${product.id})" title="Chỉnh sửa">
+                                    ✏️ Sửa
+                                </button>
+                                <button class="btn btn-outline-danger" onclick="deleteProduct(${product.id})" title="Xóa">
+                                    🗑️ Xóa
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Save product (add or update)
+        async function saveProduct() {
+            const name = document.getElementById('productName').value.trim();
+            const price = parseFloat(document.getElementById('productPrice').value);
+            const description = document.getElementById('productDescription').value.trim();
+            const categoryId = parseInt(document.getElementById('productCategory').value);
+            
+            if (!name) {
+                showToast('Vui lòng nhập tên sản phẩm!', 'warning');
+                document.getElementById('productName').focus();
+                return;
+            }
+            
+            if (!price || price <= 0) {
+                showToast('Vui lòng nhập giá hợp lệ!', 'warning');
+                document.getElementById('productPrice').focus();
+                return;
+            }
+            
+            if (!categoryId) {
+                showToast('Vui lòng chọn danh mục!', 'warning');
+                document.getElementById('productCategory').focus();
+                return;
+            }
+
+            const productData = { name, price, description, categoryId };
+            
+            try {
+                let response;
+                if (editingId) {
+                    // Update
+                    productData.id = editingId;
+                    response = await fetch(`${API_URL}/ProductApi/${editingId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(productData)
+                    });
+                    if (response.ok) {
+                        showToast('Cập nhật sản phẩm thành công!', 'success');
+                    }
+                } else {
+                    // Add new
+                    response = await fetch(`${API_URL}/ProductApi`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(productData)
+                    });
+                    if (response.ok) {
+                        showToast('Thêm sản phẩm thành công!', 'success');
+                    }
+                }
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                // Reset form and reload
+                resetForm();
+                loadData();
+                
+            } catch (error) {
+                showToast('Lỗi khi lưu sản phẩm: ' + error.message, 'danger');
+            }
+        }
+
+        // Edit product
+        function editProduct(id) {
+            const product = products.find(p => p.id === id);
+            if (!product) return;
+
+            editingId = id;
+            document.getElementById('productName').value = product.name;
+            document.getElementById('productPrice').value = product.price;
+            document.getElementById('productDescription').value = product.description || '';
+            document.getElementById('productCategory').value = product.categoryId;
+            
+            // Update UI
+            document.getElementById('formTitle').textContent = '✏️ Chỉnh sửa sản phẩm';
+            document.getElementById('btnSave').innerHTML = '💾 Cập nhật';
+            document.getElementById('btnSave').className = 'btn btn-warning';
+            document.getElementById('btnCancel').style.display = 'inline-block';
+            
+            // Scroll to form
+            document.getElementById('productForm').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('productName').focus();
+            
+            showToast(`Đang chỉnh sửa: ${product.name}`, 'info');
+        }
+
+        // View product details
+        function viewProduct(id) {
+            const product = products.find(p => p.id === id);
+            if (!product) return;
+
+            const category = categories.find(c => c.id === product.categoryId);
+            const details = `
+                <strong>ID:</strong> #${product.id}<br>
+                <strong>Tên:</strong> ${product.name}<br>
+                <strong>Giá:</strong> ${formatCurrency(product.price)}<br>
+                <strong>Mô tả:</strong> ${product.description || 'Không có mô tả'}<br>
+                <strong>Danh mục:</strong> ${category ? category.name : 'Không có danh mục'}
+            `;
+
+            showToast(`Chi tiết sản phẩm:<br>${details}`, 'info');
+        }
+
+        // Cancel edit
+        function cancelEdit() {
+            resetForm();
+            showToast('Đã hủy chỉnh sửa', 'info');
+        }
+
+        // Reset form
+        function resetForm() {
+            editingId = null;
+            document.getElementById('productForm').reset();
+            document.getElementById('formTitle').textContent = '➕ Thêm sản phẩm mới';
+            document.getElementById('btnSave').innerHTML = '➕ Thêm';
+            document.getElementById('btnSave').className = 'btn btn-primary';
+            document.getElementById('btnCancel').style.display = 'none';
+        }
+
+        // Delete product
+        async function deleteProduct(id) {
+            const product = products.find(p => p.id === id);
+            if (!product) return;
+
+            if (!confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${product.name}"?`)) return;
+
+            try {
+                const response = await fetch(`${API_URL}/ProductApi/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                showToast('Xóa sản phẩm thành công!', 'success');
+                loadData();
+                
+            } catch (error) {
+                showToast('Lỗi khi xóa sản phẩm: ' + error.message, 'danger');
+            }
+        }
+
+        // Search products
+        function searchProducts() {
+            applyFilters();
+        }
+
+        // Filter by category
+        function filterByCategory() {
+            applyFilters();
+        }
+
+        // Filter by price
+        function filterByPrice() {
+            applyFilters();
+        }
+
+        // Apply all filters
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const priceFilter = document.getElementById('priceFilter').value;
+
+            filteredProducts = products.filter(product => {
+                // Search filter
+                const matchSearch = !searchTerm || 
+                    product.name.toLowerCase().includes(searchTerm) ||
+                    (product.description && product.description.toLowerCase().includes(searchTerm));
+
+                // Category filter
+                const matchCategory = !categoryFilter || product.categoryId == categoryFilter;
+
+                // Price filter
+                let matchPrice = true;
+                if (priceFilter) {
+                    const [min, max] = priceFilter.split('-').map(x => parseInt(x));
+                    matchPrice = product.price >= min && product.price <= max;
+                }
+
+                return matchSearch && matchCategory && matchPrice;
+            });
+
+            displayProducts();
+            updateTotalCount();
+        }
+
+        // Update total count
+        function updateTotalCount() {
+            document.getElementById('totalCount').textContent = filteredProducts.length;
+        }
+
+        // Refresh data
+        function refreshData() {
+            showToast('Đang làm mới dữ liệu...', 'info');
+            loadData();
+        }
+
+        // Format currency
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            }).format(amount);
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'success') {
+            const toastContainer = document.getElementById('toastContainer');
+            const toastId = 'toast-' + Date.now();
+            
+            const bgClass = {
+                'success': 'bg-success',
+                'danger': 'bg-danger', 
+                'warning': 'bg-warning',
+                'info': 'bg-info'
+            }[type] || 'bg-success';
+            
+            const toastHTML = `
+                <div class="toast ${bgClass} text-white" id="${toastId}" role="alert">
+                    <div class="toast-body">
+                        ${message}
+                        <button type="button" class="btn-close btn-close-white float-end" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `;
+            
+            toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+            
+            const toastElement = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastElement, { delay: 4000 });
+            toast.show();
+            
+            // Remove element after hiding
+            toastElement.addEventListener('hidden.bs.toast', () => {
+                toastElement.remove();
+            });
+        }
+    </script>
+</body>
+</html>
