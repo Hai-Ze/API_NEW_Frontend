@@ -6,16 +6,32 @@
     <title>Quản lý Sản phẩm</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #f8f9fa; font-family: Arial, sans-serif; }
-        .container { max-width: 1200px; margin-top: 30px; }
-        .card { border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .card-header { background: linear-gradient(135deg, #007bff, #0056b3); color: white; font-weight: bold; }
-        .table { background-color: white; }
+        body { background-color: #f8f9fa; font-family: Arial, sans-serif; color: #495057; }
+        .container { max-width: 1200px; margin-top: 20px; }
+        .card { border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; background-color: white; border-radius: 10px; }
+        .card-header { background: linear-gradient(135deg, #007bff, #0056b3); color: white; font-weight: bold; border-radius: 10px 10px 0 0; }
+        .navbar { background: linear-gradient(135deg, #495057, #6c757d); }
+        .navbar-brand, .nav-link { color: white !important; }
+        .nav-link:hover { color: #adb5bd !important; }
         .btn-group .btn { margin: 0 2px; }
-        .navbar { background: linear-gradient(135deg, #007bff, #0056b3); }
-        .navbar-brand { color: white !important; font-weight: bold; }
-        .nav-link { color: rgba(255,255,255,0.8) !important; }
-        .nav-link:hover { color: white !important; }
+        .stats-row { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #e9ecef; }
+        .stat-item { text-align: center; }
+        .stat-number { font-size: 2.5rem; font-weight: bold; color: #007bff; }
+        .stat-label { color: #6c757d; font-size: 1rem; margin-top: 5px; }
+        .table { background-color: white; color: #495057; }
+        .table-dark { background-color: #495057; color: white; }
+        .form-control { background-color: #f8f9fa; border: 2px solid #e9ecef; color: #495057; border-radius: 8px; }
+        .form-control:focus { background-color: white; border-color: #007bff; color: #495057; box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); }
+        .form-control::placeholder { color: #adb5bd; }
+        .btn-primary { background-color: #007bff; border-color: #007bff; border-radius: 8px; }
+        .btn-warning { background-color: #ffc107; border-color: #ffc107; color: #212529; border-radius: 8px; }
+        .btn-danger { background-color: #dc3545; border-color: #dc3545; border-radius: 8px; }
+        .btn-info { background-color: #17a2b8; border-color: #17a2b8; border-radius: 8px; }
+        .btn-outline-secondary { color: #6c757d; border-color: #6c757d; border-radius: 8px; }
+        .btn-outline-secondary:hover { background-color: #6c757d; border-color: #6c757d; color: white; }
+        .text-muted { color: #6c757d !important; }
+        .text-primary { color: #007bff !important; }
+        .badge.bg-secondary { background-color: #6c757d !important; }
         .price { font-weight: bold; color: #28a745; }
     </style>
 </head>
@@ -23,7 +39,7 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand" href="#">🏪 QUẢN LÝ CỬA HÀNG</a>
+            <a class="navbar-brand" href="index.html">🏪 Cửa hàng</a>
             <div class="navbar-nav ms-auto">
                 <a class="nav-link" href="categories.html">📦 Danh mục</a>
                 <a class="nav-link active" href="products.html">🛍️ Sản phẩm</a>
@@ -35,7 +51,24 @@
         <!-- Header -->
         <div class="text-center mb-4">
             <h1>🛍️ QUẢN LÝ SẢN PHẨM</h1>
-            <p class="text-muted">Thêm, sửa, xóa các sản phẩm trong cửa hàng</p>
+            <p class="text-muted">Thêm, sửa, xóa sản phẩm trong cửa hàng</p>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats-row">
+            <div class="row">
+                <div class="col-md-4 stat-item">
+                    <div class="stat-number" id="totalProducts">0</div>
+                    <div class="stat-label">Tổng sản phẩm</div>
+                </div>
+                <div class="col-md-4 stat-item">
+                    <div class="stat-number" id="totalValue">0đ</div>
+                    <div class="stat-label">Tổng giá trị</div>
+                </div>
+                <div class="col-md-4 stat-item">
+                    <button class="btn btn-outline-secondary btn-sm" onclick="refreshData()">🔄 Làm mới</button>
+                </div>
+            </div>
         </div>
 
         <!-- Add/Edit Form -->
@@ -45,58 +78,41 @@
             </div>
             <div class="card-body">
                 <form id="productForm">
-                    <input type="hidden" id="productId">
+                    <input type="hidden" id="editingId">
                     <div class="row">
                         <div class="col-md-3">
-                            <label class="form-label">Tên sản phẩm <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="productName" required placeholder="Nhập tên sản phẩm">
+                            <input type="text" class="form-control" id="productName" placeholder="Tên sản phẩm *" required>
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label">Giá (VNĐ) <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="productPrice" min="0" step="1000" required placeholder="0">
+                            <input type="number" class="form-control" id="productPrice" placeholder="Giá (VNĐ) *" min="0" step="1000" required>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Mô tả</label>
                             <input type="text" class="form-control" id="productDescription" placeholder="Mô tả sản phẩm">
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label">Danh mục <span class="text-danger">*</span></label>
                             <select class="form-control" id="productCategory" required>
                                 <option value="">Chọn danh mục</option>
                             </select>
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label">&nbsp;</label>
-                            <div class="d-grid">
-                                <button type="button" class="btn btn-primary" id="btnSave" onclick="saveProduct()">
-                                    ➕ Thêm
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row mt-2">
-                        <div class="col-12">
-                            <button type="button" class="btn btn-secondary btn-sm" id="btnCancel" onclick="cancelEdit()" style="display: none;">
-                                ❌ Hủy chỉnh sửa
+                            <button type="button" class="btn btn-primary w-100" id="btnSave" onclick="saveProduct()">
+                                ➕ Thêm
                             </button>
                         </div>
+                    </div>
+                    <div class="mt-2">
+                        <button type="button" class="btn btn-secondary btn-sm" id="btnCancel" onclick="cancelEdit()" style="display: none;">
+                            ❌ Hủy
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
 
-        <!-- Products List -->
+        <!-- Search and Filter -->
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5>📋 Danh sách sản phẩm</h5>
-                <div>
-                    <button class="btn btn-outline-light btn-sm" onclick="refreshData()">🔄 Làm mới</button>
-                    <span class="badge bg-light text-dark ms-2">Tổng: <span id="totalCount">0</span></span>
-                </div>
-            </div>
             <div class="card-body">
-                <!-- Search and Filter -->
-                <div class="row mb-3">
+                <div class="row">
                     <div class="col-md-6">
                         <input type="text" class="form-control" id="searchInput" placeholder="🔍 Tìm kiếm sản phẩm..." onkeyup="searchProducts()">
                     </div>
@@ -115,10 +131,17 @@
                         </select>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <!-- Table -->
+        <!-- Products Table -->
+        <div class="card">
+            <div class="card-header">
+                <h5>📋 Danh sách sản phẩm</h5>
+            </div>
+            <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-hover table-bordered">
+                    <table class="table table-hover">
                         <thead class="table-dark">
                             <tr>
                                 <th style="width: 60px;">ID</th>
@@ -126,17 +149,12 @@
                                 <th style="width: 120px;">Giá</th>
                                 <th>Mô tả</th>
                                 <th style="width: 120px;">Danh mục</th>
-                                <th style="width: 200px;">Thao tác</th>
+                                <th style="width: 180px;">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody id="productsList">
                             <tr>
-                                <td colspan="6" class="text-center">
-                                    <div class="spinner-border text-primary" role="status">
-                                        <span class="visually-hidden">Loading...</span>
-                                    </div>
-                                    <p class="mt-2 mb-0">Đang tải dữ liệu...</p>
-                                </td>
+                                <td colspan="6" class="text-center">🔄 Đang tải dữ liệu...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -145,68 +163,33 @@
         </div>
     </div>
 
-    <!-- Toast Container -->
-    <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer"></div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Configuration
         const API_URL = 'https://localhost:7077/api';
-        
-        // Global variables
         let products = [];
         let categories = [];
         let filteredProducts = [];
         let editingId = null;
 
         // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            loadData();
-            checkCategoryFilter();
-        });
-
-        // Check URL for category filter
-        function checkCategoryFilter() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const categoryId = urlParams.get('category');
-            if (categoryId) {
-                setTimeout(() => {
-                    document.getElementById('categoryFilter').value = categoryId;
-                    filterByCategory();
-                }, 1000);
-            }
-        }
+        document.addEventListener('DOMContentLoaded', loadData);
 
         // Load all data
         async function loadData() {
-            await Promise.all([loadProducts(), loadCategories()]);
-            updateDisplay();
-        }
-
-        // Load products
-        async function loadProducts() {
             try {
-                const response = await fetch(`${API_URL}/ProductApi`);
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                products = await response.json();
+                const [productsRes, categoriesRes] = await Promise.all([
+                    fetch(`${API_URL}/ProductApi`),
+                    fetch(`${API_URL}/CategoryApi`)
+                ]);
+                
+                products = await productsRes.json();
+                categories = await categoriesRes.json();
                 filteredProducts = [...products];
-            } catch (error) {
-                showToast('Lỗi khi tải sản phẩm: ' + error.message, 'danger');
-                products = [];
-                filteredProducts = [];
-            }
-        }
-
-        // Load categories
-        async function loadCategories() {
-            try {
-                const response = await fetch(`${API_URL}/CategoryApi`);
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                categories = await response.json();
+                
+                updateDisplay();
+                updateStats();
                 updateCategorySelects();
             } catch (error) {
-                showToast('Lỗi khi tải danh mục: ' + error.message, 'danger');
-                categories = [];
+                showError('Lỗi khi tải dữ liệu: ' + error.message);
             }
         }
 
@@ -226,12 +209,6 @@
 
         // Update display
         function updateDisplay() {
-            displayProducts();
-            updateTotalCount();
-        }
-
-        // Display products
-        function displayProducts() {
             const tbody = document.getElementById('productsList');
             
             if (filteredProducts.length === 0) {
@@ -246,90 +223,74 @@
                         <td><strong>#${product.id}</strong></td>
                         <td><strong class="text-primary">${product.name}</strong></td>
                         <td class="price">${formatCurrency(product.price)}</td>
-                        <td>${product.description || '<em class="text-muted">Không có mô tả</em>'}</td>
+                        <td>${product.description || '<em class="text-muted">Không có</em>'}</td>
                         <td>
                             <span class="badge bg-secondary">${category ? category.name : 'N/A'}</span>
                         </td>
                         <td>
-                            <div class="btn-group btn-group-sm" role="group">
-                                <button class="btn btn-outline-info" onclick="viewProduct(${product.id})" title="Xem chi tiết">
-                                    👁️ Xem
-                                </button>
-                                <button class="btn btn-outline-warning" onclick="editProduct(${product.id})" title="Chỉnh sửa">
-                                    ✏️ Sửa
-                                </button>
-                                <button class="btn btn-outline-danger" onclick="deleteProduct(${product.id})" title="Xóa">
-                                    🗑️ Xóa
-                                </button>
-                            </div>
+                            <button class="btn btn-info btn-sm" onclick="viewProduct(${product.id})" title="Xem">
+                                👁️
+                            </button>
+                            <button class="btn btn-warning btn-sm" onclick="editProduct(${product.id})" title="Sửa">
+                                ✏️
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteProduct(${product.id})" title="Xóa">
+                                🗑️
+                            </button>
                         </td>
                     </tr>
                 `;
             }).join('');
         }
 
-        // Save product (add or update)
+        // Update statistics
+        function updateStats() {
+            const totalProds = products.length;
+            const totalVal = products.reduce((sum, product) => sum + (product.price || 0), 0);
+
+            document.getElementById('totalProducts').textContent = totalProds;
+            document.getElementById('totalValue').textContent = formatCurrency(totalVal);
+        }
+
+        // Save product
         async function saveProduct() {
             const name = document.getElementById('productName').value.trim();
             const price = parseFloat(document.getElementById('productPrice').value);
             const description = document.getElementById('productDescription').value.trim();
             const categoryId = parseInt(document.getElementById('productCategory').value);
             
-            if (!name) {
-                showToast('Vui lòng nhập tên sản phẩm!', 'warning');
-                document.getElementById('productName').focus();
-                return;
-            }
-            
-            if (!price || price <= 0) {
-                showToast('Vui lòng nhập giá hợp lệ!', 'warning');
-                document.getElementById('productPrice').focus();
-                return;
-            }
-            
-            if (!categoryId) {
-                showToast('Vui lòng chọn danh mục!', 'warning');
-                document.getElementById('productCategory').focus();
+            if (!name || !price || !categoryId) {
+                alert('Vui lòng nhập đầy đủ thông tin!');
                 return;
             }
 
-            const productData = { name, price, description, categoryId };
-            
             try {
+                const data = { name, price, description, categoryId };
                 let response;
+
                 if (editingId) {
-                    // Update
-                    productData.id = editingId;
+                    data.id = editingId;
                     response = await fetch(`${API_URL}/ProductApi/${editingId}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(productData)
+                        body: JSON.stringify(data)
                     });
-                    if (response.ok) {
-                        showToast('Cập nhật sản phẩm thành công!', 'success');
-                    }
+                    alert('Cập nhật thành công!');
                 } else {
-                    // Add new
                     response = await fetch(`${API_URL}/ProductApi`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(productData)
+                        body: JSON.stringify(data)
                     });
-                    if (response.ok) {
-                        showToast('Thêm sản phẩm thành công!', 'success');
-                    }
+                    alert('Thêm sản phẩm thành công!');
                 }
 
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-
-                // Reset form and reload
+                if (!response.ok) throw new Error('Lỗi API');
+                
                 resetForm();
                 loadData();
-                
             } catch (error) {
-                showToast('Lỗi khi lưu sản phẩm: ' + error.message, 'danger');
+                alert('Lỗi: ' + error.message);
             }
         }
 
@@ -343,108 +304,51 @@
             document.getElementById('productPrice').value = product.price;
             document.getElementById('productDescription').value = product.description || '';
             document.getElementById('productCategory').value = product.categoryId;
-            
-            // Update UI
             document.getElementById('formTitle').textContent = '✏️ Chỉnh sửa sản phẩm';
             document.getElementById('btnSave').innerHTML = '💾 Cập nhật';
-            document.getElementById('btnSave').className = 'btn btn-warning';
+            document.getElementById('btnSave').className = 'btn btn-warning w-100';
             document.getElementById('btnCancel').style.display = 'inline-block';
-            
-            // Scroll to form
-            document.getElementById('productForm').scrollIntoView({ behavior: 'smooth' });
-            document.getElementById('productName').focus();
-            
-            showToast(`Đang chỉnh sửa: ${product.name}`, 'info');
         }
 
-        // View product details
+        // View product
         function viewProduct(id) {
             const product = products.find(p => p.id === id);
             if (!product) return;
 
             const category = categories.find(c => c.id === product.categoryId);
-            const details = `
-                <strong>ID:</strong> #${product.id}<br>
-                <strong>Tên:</strong> ${product.name}<br>
-                <strong>Giá:</strong> ${formatCurrency(product.price)}<br>
-                <strong>Mô tả:</strong> ${product.description || 'Không có mô tả'}<br>
-                <strong>Danh mục:</strong> ${category ? category.name : 'Không có danh mục'}
-            `;
-
-            showToast(`Chi tiết sản phẩm:<br>${details}`, 'info');
-        }
-
-        // Cancel edit
-        function cancelEdit() {
-            resetForm();
-            showToast('Đã hủy chỉnh sửa', 'info');
-        }
-
-        // Reset form
-        function resetForm() {
-            editingId = null;
-            document.getElementById('productForm').reset();
-            document.getElementById('formTitle').textContent = '➕ Thêm sản phẩm mới';
-            document.getElementById('btnSave').innerHTML = '➕ Thêm';
-            document.getElementById('btnSave').className = 'btn btn-primary';
-            document.getElementById('btnCancel').style.display = 'none';
+            const details = `ID: #${product.id}\nTên: ${product.name}\nGiá: ${formatCurrency(product.price)}\nMô tả: ${product.description || 'Không có'}\nDanh mục: ${category ? category.name : 'N/A'}`;
+            alert(details);
         }
 
         // Delete product
         async function deleteProduct(id) {
             const product = products.find(p => p.id === id);
-            if (!product) return;
-
-            if (!confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${product.name}"?`)) return;
+            if (!confirm(`Xóa sản phẩm "${product.name}"?`)) return;
 
             try {
-                const response = await fetch(`${API_URL}/ProductApi/${id}`, {
-                    method: 'DELETE'
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-
-                showToast('Xóa sản phẩm thành công!', 'success');
-                loadData();
+                const response = await fetch(`${API_URL}/ProductApi/${id}`, { method: 'DELETE' });
+                if (!response.ok) throw new Error('Lỗi API');
                 
+                alert('Xóa thành công!');
+                loadData();
             } catch (error) {
-                showToast('Lỗi khi xóa sản phẩm: ' + error.message, 'danger');
+                alert('Lỗi: ' + error.message);
             }
         }
 
-        // Search products
-        function searchProducts() {
-            applyFilters();
-        }
-
-        // Filter by category
-        function filterByCategory() {
-            applyFilters();
-        }
-
-        // Filter by price
-        function filterByPrice() {
-            applyFilters();
-        }
-
-        // Apply all filters
+        // Apply filters
         function applyFilters() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const categoryFilter = document.getElementById('categoryFilter').value;
             const priceFilter = document.getElementById('priceFilter').value;
 
             filteredProducts = products.filter(product => {
-                // Search filter
                 const matchSearch = !searchTerm || 
                     product.name.toLowerCase().includes(searchTerm) ||
                     (product.description && product.description.toLowerCase().includes(searchTerm));
 
-                // Category filter
                 const matchCategory = !categoryFilter || product.categoryId == categoryFilter;
 
-                // Price filter
                 let matchPrice = true;
                 if (priceFilter) {
                     const [min, max] = priceFilter.split('-').map(x => parseInt(x));
@@ -454,19 +358,33 @@
                 return matchSearch && matchCategory && matchPrice;
             });
 
-            displayProducts();
-            updateTotalCount();
+            updateDisplay();
         }
 
-        // Update total count
-        function updateTotalCount() {
-            document.getElementById('totalCount').textContent = filteredProducts.length;
+        // Search products
+        function searchProducts() { applyFilters(); }
+        function filterByCategory() { applyFilters(); }
+        function filterByPrice() { applyFilters(); }
+
+        // Cancel edit
+        function cancelEdit() { resetForm(); }
+
+        // Reset form
+        function resetForm() {
+            editingId = null;
+            document.getElementById('productForm').reset();
+            document.getElementById('formTitle').textContent = '➕ Thêm sản phẩm mới';
+            document.getElementById('btnSave').innerHTML = '➕ Thêm';
+            document.getElementById('btnSave').className = 'btn btn-primary w-100';
+            document.getElementById('btnCancel').style.display = 'none';
         }
 
         // Refresh data
         function refreshData() {
-            showToast('Đang làm mới dữ liệu...', 'info');
             loadData();
+            const btn = event.target;
+            btn.textContent = '⏳ Đang tải...';
+            setTimeout(() => btn.textContent = '🔄 Làm mới', 1000);
         }
 
         // Format currency
@@ -477,37 +395,10 @@
             }).format(amount);
         }
 
-        // Show toast notification
-        function showToast(message, type = 'success') {
-            const toastContainer = document.getElementById('toastContainer');
-            const toastId = 'toast-' + Date.now();
-            
-            const bgClass = {
-                'success': 'bg-success',
-                'danger': 'bg-danger', 
-                'warning': 'bg-warning',
-                'info': 'bg-info'
-            }[type] || 'bg-success';
-            
-            const toastHTML = `
-                <div class="toast ${bgClass} text-white" id="${toastId}" role="alert">
-                    <div class="toast-body">
-                        ${message}
-                        <button type="button" class="btn-close btn-close-white float-end" data-bs-dismiss="toast"></button>
-                    </div>
-                </div>
-            `;
-            
-            toastContainer.insertAdjacentHTML('beforeend', toastHTML);
-            
-            const toastElement = document.getElementById(toastId);
-            const toast = new bootstrap.Toast(toastElement, { delay: 4000 });
-            toast.show();
-            
-            // Remove element after hiding
-            toastElement.addEventListener('hidden.bs.toast', () => {
-                toastElement.remove();
-            });
+        // Show error
+        function showError(message) {
+            document.getElementById('productsList').innerHTML = 
+                `<tr><td colspan="6" class="text-center text-danger">${message}</td></tr>`;
         }
     </script>
 </body>

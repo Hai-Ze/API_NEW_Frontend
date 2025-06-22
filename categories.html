@@ -6,23 +6,38 @@
     <title>Quản lý Danh mục</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #f8f9fa; font-family: Arial, sans-serif; }
-        .container { max-width: 1000px; margin-top: 30px; }
-        .card { border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .card-header { background: linear-gradient(135deg, #28a745, #20c997); color: white; font-weight: bold; }
-        .table { background-color: white; }
+        body { background-color: #f8f9fa; font-family: Arial, sans-serif; color: #495057; }
+        .container { max-width: 1000px; margin-top: 20px; }
+        .card { border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; background-color: white; border-radius: 10px; }
+        .card-header { background: linear-gradient(135deg, #6c757d, #495057); color: white; font-weight: bold; border-radius: 10px 10px 0 0; }
+        .navbar { background: linear-gradient(135deg, #495057, #6c757d); }
+        .navbar-brand, .nav-link { color: white !important; }
+        .nav-link:hover { color: #adb5bd !important; }
         .btn-group .btn { margin: 0 2px; }
-        .navbar { background: linear-gradient(135deg, #007bff, #0056b3); }
-        .navbar-brand { color: white !important; font-weight: bold; }
-        .nav-link { color: rgba(255,255,255,0.8) !important; }
-        .nav-link:hover { color: white !important; }
+        .stats-row { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #e9ecef; }
+        .stat-item { text-align: center; }
+        .stat-number { font-size: 2.5rem; font-weight: bold; color: #495057; }
+        .stat-label { color: #6c757d; font-size: 1rem; margin-top: 5px; }
+        .table { background-color: white; color: #495057; }
+        .table-dark { background-color: #495057; color: white; }
+        .form-control { background-color: #f8f9fa; border: 2px solid #e9ecef; color: #495057; border-radius: 8px; }
+        .form-control:focus { background-color: white; border-color: #6c757d; color: #495057; box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25); }
+        .form-control::placeholder { color: #adb5bd; }
+        .btn-success { background-color: #28a745; border-color: #28a745; border-radius: 8px; }
+        .btn-warning { background-color: #ffc107; border-color: #ffc107; color: #212529; border-radius: 8px; }
+        .btn-danger { background-color: #dc3545; border-color: #dc3545; border-radius: 8px; }
+        .btn-outline-secondary { color: #6c757d; border-color: #6c757d; border-radius: 8px; }
+        .btn-outline-secondary:hover { background-color: #6c757d; border-color: #6c757d; color: white; }
+        .text-muted { color: #6c757d !important; }
+        .text-primary { color: #007bff !important; }
+        .badge.bg-info { background-color: #17a2b8 !important; }
     </style>
 </head>
 <body>
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand" href="#">🏪 QUẢN LÝ CỬA HÀNG</a>
+            <a class="navbar-brand" href="index.html">🏪 Cửa hàng</a>
             <div class="navbar-nav ms-auto">
                 <a class="nav-link active" href="categories.html">📦 Danh mục</a>
                 <a class="nav-link" href="products.html">🛍️ Sản phẩm</a>
@@ -34,7 +49,20 @@
         <!-- Header -->
         <div class="text-center mb-4">
             <h1>📦 QUẢN LÝ DANH MỤC</h1>
-            <p class="text-muted">Thêm, sửa, xóa các danh mục sản phẩm</p>
+            <p class="text-muted">Thêm, sửa, xóa danh mục sản phẩm</p>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats-row">
+            <div class="row">
+                <div class="col-md-6 stat-item">
+                    <div class="stat-number" id="totalCategories">0</div>
+                    <div class="stat-label">Tổng danh mục</div>
+                </div>
+                <div class="col-md-6 stat-item">
+                    <button class="btn btn-outline-secondary btn-sm" onclick="refreshData()">🔄 Làm mới</button>
+                </div>
+            </div>
         </div>
 
         <!-- Add/Edit Form -->
@@ -44,73 +72,56 @@
             </div>
             <div class="card-body">
                 <form id="categoryForm">
-                    <input type="hidden" id="categoryId">
+                    <input type="hidden" id="editingId">
                     <div class="row">
                         <div class="col-md-4">
-                            <label class="form-label">Tên danh mục <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="categoryName" required placeholder="Nhập tên danh mục">
+                            <input type="text" class="form-control" id="categoryName" placeholder="Tên danh mục *" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Mô tả</label>
-                            <input type="text" class="form-control" id="categoryDescription" placeholder="Mô tả về danh mục">
+                            <input type="text" class="form-control" id="categoryDescription" placeholder="Mô tả danh mục">
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label">&nbsp;</label>
-                            <div class="d-grid">
-                                <button type="button" class="btn btn-success" id="btnSave" onclick="saveCategory()">
-                                    ➕ Thêm
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row mt-2">
-                        <div class="col-12">
-                            <button type="button" class="btn btn-secondary btn-sm" id="btnCancel" onclick="cancelEdit()" style="display: none;">
-                                ❌ Hủy chỉnh sửa
+                            <button type="button" class="btn btn-success w-100" id="btnSave" onclick="saveCategory()">
+                                ➕ Thêm
                             </button>
                         </div>
+                    </div>
+                    <div class="mt-2">
+                        <button type="button" class="btn btn-secondary btn-sm" id="btnCancel" onclick="cancelEdit()" style="display: none;">
+                            ❌ Hủy
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
 
-        <!-- Categories List -->
+        <!-- Search -->
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="card-body">
+                <input type="text" class="form-control" id="searchInput" placeholder="🔍 Tìm kiếm danh mục..." onkeyup="searchCategories()">
+            </div>
+        </div>
+
+        <!-- Categories Table -->
+        <div class="card">
+            <div class="card-header">
                 <h5>📋 Danh sách danh mục</h5>
-                <div>
-                    <button class="btn btn-outline-light btn-sm" onclick="refreshData()">🔄 Làm mới</button>
-                    <span class="badge bg-light text-dark ms-2">Tổng: <span id="totalCount">0</span></span>
-                </div>
             </div>
             <div class="card-body">
-                <!-- Search -->
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <input type="text" class="form-control" id="searchInput" placeholder="🔍 Tìm kiếm danh mục..." onkeyup="searchCategories()">
-                    </div>
-                </div>
-
-                <!-- Table -->
                 <div class="table-responsive">
-                    <table class="table table-hover table-bordered">
+                    <table class="table table-hover">
                         <thead class="table-dark">
                             <tr>
                                 <th style="width: 60px;">ID</th>
                                 <th>Tên danh mục</th>
                                 <th>Mô tả</th>
-                                <th style="width: 120px;">Số sản phẩm</th>
-                                <th style="width: 200px;">Thao tác</th>
+                                <th style="width: 100px;">Sản phẩm</th>
+                                <th style="width: 150px;">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody id="categoriesList">
                             <tr>
-                                <td colspan="5" class="text-center">
-                                    <div class="spinner-border text-primary" role="status">
-                                        <span class="visually-hidden">Loading...</span>
-                                    </div>
-                                    <p class="mt-2 mb-0">Đang tải dữ liệu...</p>
-                                </td>
+                                <td colspan="5" class="text-center">🔄 Đang tải dữ liệu...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -119,61 +130,35 @@
         </div>
     </div>
 
-    <!-- Toast Container -->
-    <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer"></div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Configuration
         const API_URL = 'https://localhost:7077/api';
-        
-        // Global variables
         let categories = [];
         let products = [];
         let editingId = null;
 
         // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            loadData();
-        });
+        document.addEventListener('DOMContentLoaded', loadData);
 
         // Load all data
         async function loadData() {
-            await Promise.all([loadCategories(), loadProducts()]);
-            updateDisplay();
-        }
-
-        // Load categories
-        async function loadCategories() {
             try {
-                const response = await fetch(`${API_URL}/CategoryApi`);
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                categories = await response.json();
+                const [categoriesRes, productsRes] = await Promise.all([
+                    fetch(`${API_URL}/CategoryApi`),
+                    fetch(`${API_URL}/ProductApi`)
+                ]);
+                
+                categories = await categoriesRes.json();
+                products = await productsRes.json();
+                
+                updateDisplay();
+                updateStats();
             } catch (error) {
-                showToast('Lỗi khi tải danh mục: ' + error.message, 'danger');
-                categories = [];
-            }
-        }
-
-        // Load products for counting
-        async function loadProducts() {
-            try {
-                const response = await fetch(`${API_URL}/ProductApi`);
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                products = await response.json();
-            } catch (error) {
-                products = [];
+                showError('Lỗi khi tải dữ liệu: ' + error.message);
             }
         }
 
         // Update display
         function updateDisplay() {
-            displayCategories();
-            updateTotalCount();
-        }
-
-        // Display categories
-        function displayCategories() {
             const tbody = document.getElementById('categoriesList');
             
             if (categories.length === 0) {
@@ -181,91 +166,72 @@
                 return;
             }
 
-            tbody.innerHTML = categories.map(category => {
-                const productCount = products.filter(p => p.categoryId === category.id).length;
+            tbody.innerHTML = categories.map(cat => {
+                const productCount = products.filter(p => p.categoryId === cat.id).length;
                 return `
                     <tr>
-                        <td><strong>#${category.id}</strong></td>
-                        <td><strong class="text-primary">${category.name}</strong></td>
-                        <td>${category.description || '<em class="text-muted">Không có mô tả</em>'}</td>
+                        <td><strong>#${cat.id}</strong></td>
+                        <td><strong class="text-primary">${cat.name}</strong></td>
+                        <td>${cat.description || '<em class="text-muted">Không có</em>'}</td>
                         <td class="text-center">
-                            <span class="badge bg-info">${productCount} SP</span>
+                            <span class="badge bg-info">${productCount}</span>
                         </td>
                         <td>
-                            <div class="btn-group btn-group-sm" role="group">
-                                <button class="btn btn-outline-primary" onclick="viewProducts(${category.id})" title="Xem sản phẩm">
-                                    👁️ Xem
-                                </button>
-                                <button class="btn btn-outline-warning" onclick="editCategory(${category.id})" title="Chỉnh sửa">
-                                    ✏️ Sửa
-                                </button>
-                                <button class="btn btn-outline-danger" onclick="deleteCategory(${category.id})" title="Xóa">
-                                    🗑️ Xóa
-                                </button>
-                            </div>
+                            <button class="btn btn-warning btn-sm" onclick="editCategory(${cat.id})" title="Sửa">
+                                ✏️
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteCategory(${cat.id})" title="Xóa">
+                                🗑️
+                            </button>
                         </td>
                     </tr>
                 `;
             }).join('');
         }
 
-        // Save category (add or update)
+        // Update statistics
+        function updateStats() {
+            const totalCats = categories.length;
+            document.getElementById('totalCategories').textContent = totalCats;
+        }
+
+        // Save category
         async function saveCategory() {
             const name = document.getElementById('categoryName').value.trim();
             const description = document.getElementById('categoryDescription').value.trim();
             
             if (!name) {
-                showToast('Vui lòng nhập tên danh mục!', 'warning');
-                document.getElementById('categoryName').focus();
+                alert('Vui lòng nhập tên danh mục!');
                 return;
             }
 
-            // Check duplicate name
-            const existingCategory = categories.find(c => 
-                c.name.toLowerCase() === name.toLowerCase() && c.id !== editingId
-            );
-            if (existingCategory) {
-                showToast('Tên danh mục đã tồn tại!', 'warning');
-                return;
-            }
-
-            const categoryData = { name, description };
-            
             try {
+                const data = { name, description };
                 let response;
+
                 if (editingId) {
-                    // Update
-                    categoryData.id = editingId;
+                    data.id = editingId;
                     response = await fetch(`${API_URL}/CategoryApi/${editingId}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(categoryData)
+                        body: JSON.stringify(data)
                     });
-                    if (response.ok) {
-                        showToast('Cập nhật danh mục thành công!', 'success');
-                    }
+                    alert('Cập nhật thành công!');
                 } else {
-                    // Add new
                     response = await fetch(`${API_URL}/CategoryApi`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(categoryData)
+                        body: JSON.stringify(data)
                     });
-                    if (response.ok) {
-                        showToast('Thêm danh mục thành công!', 'success');
-                    }
+                    alert('Thêm danh mục thành công!');
                 }
 
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-
-                // Reset form and reload
+                if (!response.ok) throw new Error('Lỗi API');
+                
                 resetForm();
                 loadData();
-                
             } catch (error) {
-                showToast('Lỗi khi lưu danh mục: ' + error.message, 'danger');
+                alert('Lỗi: ' + error.message);
             }
         }
 
@@ -277,24 +243,38 @@
             editingId = id;
             document.getElementById('categoryName').value = category.name;
             document.getElementById('categoryDescription').value = category.description || '';
-            
-            // Update UI
             document.getElementById('formTitle').textContent = '✏️ Chỉnh sửa danh mục';
             document.getElementById('btnSave').innerHTML = '💾 Cập nhật';
-            document.getElementById('btnSave').className = 'btn btn-warning';
+            document.getElementById('btnSave').className = 'btn btn-warning w-100';
             document.getElementById('btnCancel').style.display = 'inline-block';
+        }
+
+        // Delete category
+        async function deleteCategory(id) {
+            const category = categories.find(c => c.id === id);
+            const productCount = products.filter(p => p.categoryId === id).length;
             
-            // Scroll to form
-            document.getElementById('categoryForm').scrollIntoView({ behavior: 'smooth' });
-            document.getElementById('categoryName').focus();
-            
-            showToast(`Đang chỉnh sửa: ${category.name}`, 'info');
+            if (productCount > 0) {
+                alert(`Không thể xóa "${category.name}" vì còn ${productCount} sản phẩm!`);
+                return;
+            }
+
+            if (!confirm(`Xóa danh mục "${category.name}"?`)) return;
+
+            try {
+                const response = await fetch(`${API_URL}/CategoryApi/${id}`, { method: 'DELETE' });
+                if (!response.ok) throw new Error('Lỗi API');
+                
+                alert('Xóa thành công!');
+                loadData();
+            } catch (error) {
+                alert('Lỗi: ' + error.message);
+            }
         }
 
         // Cancel edit
         function cancelEdit() {
             resetForm();
-            showToast('Đã hủy chỉnh sửa', 'info');
         }
 
         // Reset form
@@ -303,51 +283,8 @@
             document.getElementById('categoryForm').reset();
             document.getElementById('formTitle').textContent = '➕ Thêm danh mục mới';
             document.getElementById('btnSave').innerHTML = '➕ Thêm';
-            document.getElementById('btnSave').className = 'btn btn-success';
+            document.getElementById('btnSave').className = 'btn btn-success w-100';
             document.getElementById('btnCancel').style.display = 'none';
-        }
-
-        // Delete category
-        async function deleteCategory(id) {
-            const category = categories.find(c => c.id === id);
-            if (!category) return;
-
-            // Check if category has products
-            const productCount = products.filter(p => p.categoryId === id).length;
-            if (productCount > 0) {
-                showToast(`Không thể xóa danh mục "${category.name}" vì còn ${productCount} sản phẩm!`, 'warning');
-                return;
-            }
-
-            if (!confirm(`Bạn có chắc chắn muốn xóa danh mục "${category.name}"?`)) return;
-
-            try {
-                const response = await fetch(`${API_URL}/CategoryApi/${id}`, {
-                    method: 'DELETE'
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-
-                showToast('Xóa danh mục thành công!', 'success');
-                loadData();
-                
-            } catch (error) {
-                showToast('Lỗi khi xóa danh mục: ' + error.message, 'danger');
-            }
-        }
-
-        // View products in category
-        function viewProducts(categoryId) {
-            const category = categories.find(c => c.id === categoryId);
-            const categoryProducts = products.filter(p => p.categoryId === categoryId);
-            
-            if (categoryProducts.length === 0) {
-                showToast(`Danh mục "${category.name}" chưa có sản phẩm nào!`, 'info');
-            } else {
-                window.open(`products.html?category=${categoryId}`, '_blank');
-            }
         }
 
         // Search categories
@@ -358,59 +295,24 @@
             rows.forEach(row => {
                 if (row.cells.length > 1) {
                     const name = row.cells[1].textContent.toLowerCase();
-                    const description = row.cells[2].textContent.toLowerCase();
-                    
-                    if (name.includes(searchTerm) || description.includes(searchTerm)) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
+                    const desc = row.cells[2].textContent.toLowerCase();
+                    row.style.display = (name.includes(searchTerm) || desc.includes(searchTerm)) ? '' : 'none';
                 }
             });
         }
 
-        // Update total count
-        function updateTotalCount() {
-            document.getElementById('totalCount').textContent = categories.length;
-        }
-
         // Refresh data
         function refreshData() {
-            showToast('Đang làm mới dữ liệu...', 'info');
             loadData();
+            const btn = event.target;
+            btn.textContent = '⏳ Đang tải...';
+            setTimeout(() => btn.textContent = '🔄 Làm mới', 1000);
         }
 
-        // Show toast notification
-        function showToast(message, type = 'success') {
-            const toastContainer = document.getElementById('toastContainer');
-            const toastId = 'toast-' + Date.now();
-            
-            const bgClass = {
-                'success': 'bg-success',
-                'danger': 'bg-danger', 
-                'warning': 'bg-warning',
-                'info': 'bg-info'
-            }[type] || 'bg-success';
-            
-            const toastHTML = `
-                <div class="toast ${bgClass} text-white" id="${toastId}" role="alert">
-                    <div class="toast-body">
-                        ${message}
-                        <button type="button" class="btn-close btn-close-white float-end" data-bs-dismiss="toast"></button>
-                    </div>
-                </div>
-            `;
-            
-            toastContainer.insertAdjacentHTML('beforeend', toastHTML);
-            
-            const toastElement = document.getElementById(toastId);
-            const toast = new bootstrap.Toast(toastElement, { delay: 3000 });
-            toast.show();
-            
-            // Remove element after hiding
-            toastElement.addEventListener('hidden.bs.toast', () => {
-                toastElement.remove();
-            });
+        // Show error
+        function showError(message) {
+            document.getElementById('categoriesList').innerHTML = 
+                `<tr><td colspan="5" class="text-center text-danger">${message}</td></tr>`;
         }
     </script>
 </body>
